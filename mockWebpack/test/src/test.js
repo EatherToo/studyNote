@@ -1,2 +1,2 @@
-const test = 100
+const test = 'hello test'
 export default test;

@@ -73,7 +73,18 @@ function parseModules(file) {
 parseModules('./test/src/index.js')
 
 function bundle(file) {
-  const depsGraph = JSON.stringify(parseModules(file));
+  const depsGraph = parseModules(file);
+  console.log(depsGraph)
+  const depsGraphFuncStr = Object.keys(depsGraph).reduce((preRes, curKey) => {
+
+    preRes += `"${curKey}": {code: function(require, exports) {
+      ${depsGraph[curKey].code}
+    },
+    deps: ${JSON.stringify(depsGraph[curKey].deps)},
+  },\n`
+    return preRes
+  }, '')
+
   return `(function (graph) {
         function require(file) {
             function absRequire(relPath) {
@@ -81,15 +92,17 @@ function bundle(file) {
             }
             var exports = {};
             (function (require,exports,code) {
-                eval(code)
+                code(require, exports);
             })(absRequire,exports,graph[file].code)
             return exports
         }
         require('${file}')
-    })(${depsGraph})`;
+    })({
+      ${depsGraphFuncStr}
+    })`;
 }
 
 const content = bundle('./test/src/index.js')
 
-!fs.existsSync("./dist") && fs.mkdirSync("./dist");
-fs.writeFileSync("./dist/bundle.js", content);
+!fs.existsSync("./dist") && fs.mkdirSync("./dist")
+fs.writeFileSync("./dist/bundle.js", content)
