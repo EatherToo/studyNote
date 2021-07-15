@@ -4,6 +4,8 @@ const Koa = require("koa");
 const compilerSfc = require("@vue/compiler-sfc"); // 单文件组件编译
 const compilerDom = require("@vue/compiler-dom"); // 模版编译
 const app = new Koa();
+
+// 库代码处理一下
 function rewriteImport(content) {
   return content.replace(/ from ['|"]([^'"]+)['|"]/g, function (s0, s1) {
     console.log("s", s0, s1);
@@ -19,20 +21,10 @@ app.use(async (ctx) => {
   const {
     request: { url, query },
   } = ctx;
-  console.log("url:" + url, "query type", query.type);
   // 首页
   if (url == "/") {
     ctx.type = "text/html";
     let content = fs.readFileSync("./index.html", "utf-8");
-    content = content.replace(
-      "<script ",
-      `
-      <script>
-        window.process = {env:{ NODE_ENV:'dev'}}
-      </script>
-      <script 
-    `
-    );
     ctx.body = content;
   } else if (url.endsWith(".js")) {
     // js文件
@@ -72,7 +64,6 @@ app.use(async (ctx) => {
 
     if (!query.type) {
       ctx.type = "application/javascript";
-      // 借用vue自导的compile框架 解析单文件组件，其实相当于vue-loader做的事情
       ctx.body = `
   ${rewriteImport(
     descriptor.script.content.replace("export default ", "const __script = ")
@@ -84,7 +75,6 @@ app.use(async (ctx) => {
     } else if (query.type === "template") {
       // 模板内容
       const template = descriptor.template;
-      // 要在server端吧compiler做了
       const render = compilerDom.compile(template.content, { mode: "module" })
         .code;
       ctx.type = "application/javascript";
@@ -95,5 +85,5 @@ app.use(async (ctx) => {
 });
 
 app.listen(3001, () => {
-  console.log("听我口令，3001端口，起~~");
+  console.log("listen on 3001");
 });
