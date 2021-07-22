@@ -62,7 +62,7 @@ function proxy(vm) {
 }
 
 
-class Vue {
+class _Vue {
   constructor(options) {
     this.$options = options
     this.$data = options.data
