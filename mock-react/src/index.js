@@ -1,13 +1,31 @@
-import React from 'react';
+import React, { Component } from 'react';
 import ReactDOM from './mockFiles/react-dom';
 import './index.css';
-import App from './App';
+// import App from './App';
 import reportWebVitals from './reportWebVitals';
+const FuncCom = () => {
+  return <div>
+    <h1 style={{
+      color: 'blue'
+    }}>函数组件</h1>
+  </div>
+}
+
+class ClassCom extends Component{
+  render() {
+    return <h1 style={{
+      color: 'red'
+    }}>类组件</h1>
+  }
+}
 
 ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+  <div>
+    <ClassCom/>
+    <h1>hello world!</h1>
+    <h1>hello world2</h1>
+    <FuncCom/>
+  </div>,
   document.getElementById('root')
 );
 
