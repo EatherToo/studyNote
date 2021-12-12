@@ -1,5 +1,6 @@
 import { Component } from 'react';
 import { updateClassComponent, updateFunctionComponent, updateHostComponent } from './ReactFiberReconciler';
+import { scheduleCallback, shouldYield } from './scheduler';
 import { isFn, isStr } from './utils';
 
 
@@ -13,7 +14,7 @@ export function scheduleUpdateOnFiber(fiber) {
    wipRoot = fiber;
    wipRoot.sibling = null;
    nextUnitOfWork = wipRoot;
-   console.log(fiber);
+   scheduleCallback(workLoop);
 }
 
 
@@ -50,7 +51,7 @@ function performUnitOfWork(wip) {
 
 function workLoop(IdleDeadline) {
   // 当前有空闲时间
-  while (nextUnitOfWork && IdleDeadline.timeRemaining() > 0) {
+  while (nextUnitOfWork && !shouldYield()) {
     nextUnitOfWork = performUnitOfWork(nextUnitOfWork)
   }
   if (!nextUnitOfWork && wipRoot) {
@@ -58,7 +59,7 @@ function workLoop(IdleDeadline) {
   }
 }
 
-requestIdleCallback(workLoop);
+// requestIdleCallback(workLoop);
 
 function commitRoot() {
   commitWorker(wipRoot.child);
